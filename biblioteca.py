@@ -1,25 +1,92 @@
 def carica_da_file(file_path):
     """Carica i libri dal file"""
     # TODO
+    biblioteca={}
+    try:
+
+        with open(file_path,'r',encoding='utf-8') as openfile:
+            maxsezione = int(openfile.readline().rstrip())
+            for line in openfile:
+                riga=line.rstrip().split(',')
+                titolo=riga[0]
+                autore=riga[1]
+                anno=int(riga[2])
+                pagina=int(riga[3])
+                sezione=int(riga[4])
+                biblioteca[titolo]={'author':autore,'year':anno,'pages':pagina,'section':sezione}
+
+        return biblioteca, maxsezione
+
+    except FileNotFoundError:
+        return None
 
 
-def aggiungi_libro(biblioteca, titolo, autore, anno, pagine, sezione, file_path):
+
+
+
+
+
+
+
+def aggiungi_libro(biblioteca, titolo, autore, anno, pagine, sezione, file_path, maxsezione):
     """Aggiunge un libro nella biblioteca"""
     # TODO
+
+
+
+    if titolo in biblioteca or sezione>maxsezione:
+        return None
+
+    else:
+        biblioteca[titolo]={[autore,anno,pagine,sezione]}
+        with open(file_path, 'a') as outfile:
+            outfile.write(f'{titolo},{autore},{anno},{pagine},{sezione}\n')
+            return biblioteca
 
 
 def cerca_libro(biblioteca, titolo):
     """Cerca un libro nella biblioteca dato il titolo"""
     # TODO
+    risultato = ''
+    title=titolo
+    for key, dati in biblioteca.items():
+        if key == title:
+            autore = dati['author']
+            anno=dati['year']
+            pagine = dati['pages']
+            sezione = dati['section']
+            risultato = titolo+ ', '+autore+', '+ ', '+str(anno)+', '+str(pagine)+', '+str(sezione)
+            return risultato
+
+    return None
+
+
 
 
 def elenco_libri_sezione_per_titolo(biblioteca, sezione):
     """Ordina i titoli di una data sezione della biblioteca in ordine alfabetico"""
     # TODO
 
+    libri_sezione=[]
+
+    for key,dati in biblioteca.items():
+        numero=dati['section']
+        if numero==sezione:
+            libri_sezione.append(key)
+
+        libri_sezione.sort()
+
+    if len(libri_sezione)==0:
+        return None
+    else:
+        return libri_sezione
+
+
+
+
 
 def main():
-    biblioteca = []
+    biblioteca ={}
     file_path = "biblioteca.csv"
 
     while True:
@@ -35,7 +102,7 @@ def main():
         if scelta == "1":
             while True:
                 file_path = input("Inserisci il path del file da caricare: ").strip()
-                biblioteca = carica_da_file(file_path)
+                biblioteca,maxsezione= carica_da_file(file_path)
                 if biblioteca is not None:
                     break
 
@@ -54,8 +121,8 @@ def main():
                 print("Errore: inserire valori numerici validi per anno, pagine e sezione.")
                 continue
 
-            libro = aggiungi_libro(biblioteca, titolo, autore, anno, pagine, sezione, file_path)
-            if libro:
+            biblioteca = aggiungi_libro(biblioteca, titolo, autore, anno, pagine, sezione,file_path,maxsezione)
+            if biblioteca:
                 print(f"Libro aggiunto con successo!")
             else:
                 print("Non è stato possibile aggiungere il libro.")
